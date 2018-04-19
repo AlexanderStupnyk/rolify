@@ -9,7 +9,7 @@ group :test do
   gem 'rails', github: 'rails/rails', branch: '4-1-stable'
   # There is currently an active record bug in Rails 4.1.0, this is a workaround until 4.1.1 is released
   # See https://github.com/rails/rails/issues/13648
-  # Without this patch, Resource.with_role(:role, User.first).count throws an SQL syntax exception
+  # Without this patch, Resource.with_permission(:permission, User.first).count throws an SQL syntax exception
   #gem 'railties', '~> 4.1.0'
   gem 'ammeter'
   gem 'rake'

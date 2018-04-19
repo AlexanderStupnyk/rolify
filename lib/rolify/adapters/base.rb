@@ -1,27 +1,27 @@
 module Rolify
   module Adapter
     class Base
-      def initialize(role_cname, user_cname)
-        @role_cname = role_cname
+      def initialize(permission_cname, user_cname)
+        @permission_cname = permission_cname
         @user_cname = user_cname
       end
 
-      def role_class
-        @role_cname.constantize
+      def permission_class
+        @permission_cname.constantize
       end
       
       def user_class
         @user_cname.constantize
       end
       
-      def role_table
-        role_class.table_name
+      def permission_table
+        permission_class.table_name
       end
       
-      def self.create(adapter, role_cname, user_cname)
+      def self.create(adapter, permission_cname, user_cname)
         load "rolify/adapters/#{Rolify.orm}/#{adapter}.rb"
         load "rolify/adapters/#{Rolify.orm}/scopes.rb"
-        Rolify::Adapter.const_get(adapter.camelize.to_sym).new(role_cname, user_cname)
+        Rolify::Adapter.const_get(adapter.camelize.to_sym).new(permission_cname, user_cname)
       end
 
       def relation_types_for(relation)
@@ -29,20 +29,20 @@ module Rolify
       end
     end
 
-    class RoleAdapterBase < Adapter::Base
+    class PermissionAdapterBase < Adapter::Base
       def where(relation, args)
         raise NotImplementedError.new("You must implement where")
       end
 
-      def find_or_create_by(role_name, resource_type = nil, resource_id = nil)
+      def find_or_create_by(permission_name, resource_type = nil, resource_id = nil)
         raise NotImplementedError.new("You must implement find_or_create_by")
       end
 
-      def add(relation, role_name, resource = nil)
+      def add(relation, permission_name, resource = nil)
         raise NotImplementedError.new("You must implement add")
       end
 
-      def remove(relation, role_name, resource = nil)
+      def remove(relation, permission_name, resource = nil)
         raise NotImplementedError.new("You must implement delete")
       end
 
@@ -52,11 +52,11 @@ module Rolify
     end
 
     class ResourceAdapterBase < Adapter::Base
-      def resources_find(roles_table, relation, role_name)
+      def resources_find(permissions_table, relation, permission_name)
         raise NotImplementedError.new("You must implement resources_find")
       end
 
-      def in(resources, roles)
+      def in(resources, permissions)
         raise NotImplementedError.new("You must implement in")
       end
 

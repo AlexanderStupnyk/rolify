@@ -1,20 +1,20 @@
 shared_examples_for Rolify::Dynamic do
   before(:all) do
     Rolify.dynamic_shortcuts = true
-    role_class.destroy_all
-    rolify_options = { :role_cname => role_class.to_s }
-    rolify_options[:role_join_table_name] = join_table if defined? join_table
+    permission_class.destroy_all
+    rolify_options = { :permission_cname => permission_class.to_s }
+    rolify_options[:permission_join_table_name] = join_table if defined? join_table
     silence_warnings { user_class.rolify rolify_options }
-    Forum.resourcify :roles, :role_cname => role_class.to_s
-    Group.resourcify :roles, :role_cname => role_class.to_s
+    Forum.resourcify :permissions, :permission_cname => permission_class.to_s
+    Group.resourcify :permissions, :permission_cname => permission_class.to_s
   end
 
-  context "using a global role" do
+  context "using a global permission" do
     subject do
       admin = user_class.first
-      admin.add_role :admin
-      admin.add_role :moderator, Forum.first
-      admin.add_role :solo
+      admin.add_permission :admin
+      admin.add_permission :moderator, Forum.first
+      admin.add_permission :solo
       admin
     end
 
@@ -26,9 +26,9 @@ shared_examples_for Rolify::Dynamic do
     it { subject.is_admin?.should be(true) }
     it { subject.is_admin?.should be(true) }
 
-    context "removing the role on the last user having it" do
+    context "removing the permission on the last user having it" do
       before do
-        subject.remove_role :solo
+        subject.remove_permission :solo
       end
 
       it { should_not respond_to(:is_solo?) }
@@ -36,11 +36,11 @@ shared_examples_for Rolify::Dynamic do
     end
   end
 
-  context "using a resource scoped role" do
+  context "using a resource scoped permission" do
     subject do
       moderator = user_class.where(:login => "moderator").first
-      moderator.add_role :moderator, Forum.first
-      moderator.add_role :sole_mio, Forum.last
+      moderator.add_permission :moderator, Forum.first
+      moderator.add_permission :sole_mio, Forum.last
       moderator
     end
 
@@ -57,9 +57,9 @@ shared_examples_for Rolify::Dynamic do
     it { subject.is_moderator_of?(Group.first).should be(false) }
     it { subject.is_moderator_of?(Group.last).should be(false) }
 
-    context "removing the role on the last user having it" do
+    context "removing the permission on the last user having it" do
       before do
-        subject.remove_role :sole_mio, Forum.last
+        subject.remove_permission :sole_mio, Forum.last
       end
 
       it { should_not respond_to(:is_sole_mio?) }
@@ -67,11 +67,11 @@ shared_examples_for Rolify::Dynamic do
     end
   end
 
-  context "using a class scoped role" do
+  context "using a class scoped permission" do
     subject do
       manager = user_class.where(:login => "god").first
-      manager.add_role :manager, Forum
-      manager.add_role :only_me, Forum
+      manager.add_permission :manager, Forum
+      manager.add_permission :only_me, Forum
       manager
     end
 
@@ -88,9 +88,9 @@ shared_examples_for Rolify::Dynamic do
     it { subject.is_manager_of?(Group.first).should be(false) }
     it { subject.is_manager_of?(Group.last).should be(false) }
 
-    context "removing the role on the last user having it" do
+    context "removing the permission on the last user having it" do
       before do
-        subject.remove_role :only_me, Forum
+        subject.remove_permission :only_me, Forum
       end
 
       it { should_not respond_to(:is_only_me?) }
@@ -98,14 +98,14 @@ shared_examples_for Rolify::Dynamic do
     end
   end
 
-  context "if the role doesn't exist in the database" do
+  context "if the permission doesn't exist in the database" do
 
     subject { user_class.first }
 
-    context "using a global role" do
+    context "using a global permission" do
       before(:all) do
         other_guy = user_class.last
-        other_guy.add_role :superman
+        other_guy.add_permission :superman
       end
 
       it { should respond_to(:is_superman?).with(0).arguments }
@@ -116,10 +116,10 @@ shared_examples_for Rolify::Dynamic do
       it { subject.is_god?.should be(false) }
     end
 
-    context "using a resource scope role" do
+    context "using a resource scope permission" do
       before(:all) do
         other_guy = user_class.last
-        other_guy.add_role :batman, Forum.first
+        other_guy.add_permission :batman, Forum.first
       end
 
       it { should respond_to(:is_batman?).with(0).arguments }

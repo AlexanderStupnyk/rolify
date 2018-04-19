@@ -20,7 +20,7 @@ module ActiveRecord
         invoke "active_record:model", [ name ], :migration => false
       end
 
-      def inject_role_class
+      def inject_permission_class
         if args[1]=="engine"
           if args[2]=="devise"
             require 'devise'
@@ -48,7 +48,7 @@ module ActiveRecord
         user_cname.demodulize.underscore
       end
 
-      def role_reference
+      def permission_reference
         class_name.demodulize.underscore
       end
 

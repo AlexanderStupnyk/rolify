@@ -4,8 +4,8 @@ require 'rolify/version'
 
 Gem::Specification.new do |s|
   s.name        = 'rolify'
-  s.summary     = %q{Roles library with resource scoping}
-  s.description = %q{Very simple Roles library without any authorization enforcement supporting scope on resource objects (instance or class). Supports ActiveRecord and Mongoid ORMs.}
+  s.summary     = %q{Permissions library with resource scoping}
+  s.description = %q{Very simple Permissions library without any authorization enforcement supporting scope on resource objects (instance or class). Supports ActiveRecord and Mongoid ORMs.}
   s.version     = Rolify::VERSION
   s.platform    = Gem::Platform::RUBY
   s.homepage    = 'https://github.com/RolifyCommunity/rolify'

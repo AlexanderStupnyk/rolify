@@ -2,7 +2,7 @@ require 'rolify/adapters/base'
 
 module Rolify
   module Adapter
-    class RoleAdapter < RoleAdapterBase
+    class PermissionAdapter < PermissionAdapterBase
       def where(relation, *args)
         conditions, values = build_conditions(relation, args)
         relation.where(conditions, *values)
@@ -23,12 +23,12 @@ module Rolify
         resource_id = (args[:resource].nil? || args[:resource].is_a?(Class) || args[:resource] == :any) ? nil : args[:resource].id
         resource_type = args[:resource].is_a?(Class) ? args[:resource].to_s : args[:resource].class.name
 
-        return relation.find_all { |role| role.name == args[:name].to_s } if args[:resource] == :any
+        return relation.find_all { |permission| permission.name == args[:name].to_s } if args[:resource] == :any
 
-        relation.find_all do |role|
-          (role.name == args[:name].to_s && role.resource_type == nil && role.resource_id == nil) ||
-          (role.name == args[:name].to_s && role.resource_type == resource_type && role.resource_id == nil) ||
-          (role.name == args[:name].to_s && role.resource_type == resource_type && role.resource_id == resource_id)
+        relation.find_all do |permission|
+          (permission.name == args[:name].to_s && permission.resource_type == nil && permission.resource_id == nil) ||
+          (permission.name == args[:name].to_s && permission.resource_type == resource_type && permission.resource_id == nil) ||
+          (permission.name == args[:name].to_s && permission.resource_type == resource_type && permission.resource_id == resource_id)
         end
       end
 
@@ -36,31 +36,31 @@ module Rolify
         resource_id = (args[:resource].nil? || args[:resource].is_a?(Class)) ? nil : args[:resource].id
         resource_type = args[:resource].is_a?(Class) ? args[:resource].to_s : args[:resource].class.name
 
-        relation.find_all do |role|
-          role.resource_id == resource_id && role.resource_type == resource_type && role.name == args[:name].to_s
+        relation.find_all do |permission|
+          permission.resource_id == resource_id && permission.resource_type == resource_type && permission.name == args[:name].to_s
         end
       end
 
-      def find_or_create_by(role_name, resource_type = nil, resource_id = nil)
-        role_class.where(:name => role_name, :resource_type => resource_type, :resource_id => resource_id).first_or_create
+      def find_or_create_by(permission_name, resource_type = nil, resource_id = nil)
+        permission_class.where(:name => permission_name, :resource_type => resource_type, :resource_id => resource_id).first_or_create
       end
 
-      def add(relation, role)
-        relation.role_ids |= [role.id]
+      def add(relation, permission)
+        relation.permission_ids |= [permission.id]
       end
 
-      def remove(relation, role_name, resource = nil)
-        cond = { :name => role_name }
+      def remove(relation, permission_name, resource = nil)
+        cond = { :name => permission_name }
         cond[:resource_type] = (resource.is_a?(Class) ? resource.to_s : resource.class.name) if resource
         cond[:resource_id] = resource.id if resource && !resource.is_a?(Class)
-        roles = relation.roles.where(cond)
-        if roles
-          relation.roles.delete(roles)
-          roles.each do |role|
-            role.destroy if role.send(ActiveSupport::Inflector.demodulize(user_class).tableize.to_sym).limit(1).empty?
-          end if Rolify.remove_role_if_empty
+        permissions = relation.permissions.where(cond)
+        if permissions
+          relation.permissions.delete(permissions)
+          permissions.each do |permission|
+            permission.destroy if permission.send(ActiveSupport::Inflector.demodulize(user_class).tableize.to_sym).limit(1).empty?
+          end if Rolify.remove_permission_if_empty
         end
-        roles
+        permissions
       end
 
       def exists?(relation, column)
@@ -73,7 +73,7 @@ module Rolify
         else
           query = relation.all
         end
-        query = query.joins(:roles)
+        query = query.joins(:permissions)
         query = where(query, conditions)
         query
       end
@@ -103,17 +103,17 @@ module Rolify
         [ conditions, values ]
       end
 
-      def build_query(role, resource = nil)
-        return [ "#{role_table}.name = ?", [ role ] ] if resource == :any
-        query = "((#{role_table}.name = ?) AND (#{role_table}.resource_type IS NULL) AND (#{role_table}.resource_id IS NULL))"
-        values = [ role ]
+      def build_query(permission, resource = nil)
+        return [ "#{permission_table}.name = ?", [ permission ] ] if resource == :any
+        query = "((#{permission_table}.name = ?) AND (#{permission_table}.resource_type IS NULL) AND (#{permission_table}.resource_id IS NULL))"
+        values = [ permission ]
         if resource
           query.insert(0, "(")
-          query += " OR ((#{role_table}.name = ?) AND (#{role_table}.resource_type = ?) AND (#{role_table}.resource_id IS NULL))"
-          values << role << (resource.is_a?(Class) ? resource.to_s : resource.class.name)
+          query += " OR ((#{permission_table}.name = ?) AND (#{permission_table}.resource_type = ?) AND (#{permission_table}.resource_id IS NULL))"
+          values << permission << (resource.is_a?(Class) ? resource.to_s : resource.class.name)
           if !resource.is_a? Class
-            query += " OR ((#{role_table}.name = ?) AND (#{role_table}.resource_type = ?) AND (#{role_table}.resource_id = ?))"
-            values << role << resource.class.name << resource.id
+            query += " OR ((#{permission_table}.name = ?) AND (#{permission_table}.resource_type = ?) AND (#{permission_table}.resource_id = ?))"
+            values << permission << resource.class.name << resource.id
           end
           query += ")"
         end

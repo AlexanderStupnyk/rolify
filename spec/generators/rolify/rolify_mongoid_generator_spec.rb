@@ -17,7 +17,7 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'mongoid'
   end
 
   describe 'specifying ORM adapter' do
-    before(:all) { arguments [ "Role", "User", "--orm=mongoid" ] }
+    before(:all) { arguments [ "Permission", "User", "--orm=mongoid" ] }
 
     before {
       capture(:stdout) {
@@ -43,10 +43,10 @@ RUBY
       it { should contain "# config.use_dynamic_shortcuts" }
     end
 
-    describe 'app/models/role.rb' do
-      subject { file('app/models/role.rb') }
+    describe 'app/models/permission.rb' do
+      subject { file('app/models/permission.rb') }
       it { should exist }
-      it { should contain "class Role\n" }
+      it { should contain "class Permission\n" }
       it { should contain "has_and_belongs_to_many :users\n" }
       it { should contain "belongs_to :resource, :polymorphic => true" }
       it { should contain "field :name, :type => String" }
@@ -67,8 +67,8 @@ RUBY
     end
   end
 
-  describe 'specifying namespaced User and Role class names and ORM adapter' do
-    before(:all) { arguments %w(Admin::Role Admin::User --orm=mongoid) }
+  describe 'specifying namespaced User and Permission class names and ORM adapter' do
+    before(:all) { arguments %w(Admin::Permission Admin::User --orm=mongoid) }
 
     before {
       capture(:stdout) {
@@ -90,16 +90,16 @@ RUBY
       subject { file('config/initializers/rolify.rb') }
 
       it { should exist }
-      it { should contain "Rolify.configure(\"Admin::Role\") do |config|"}
+      it { should contain "Rolify.configure(\"Admin::Permission\") do |config|"}
       it { should contain "# config.use_dynamic_shortcuts" }
       it { should_not contain "# config.use_mongoid" }
     end
 
-    describe 'app/models/admin/role.rb' do
-      subject { file('app/models/admin/role.rb') }
+    describe 'app/models/admin/permission.rb' do
+      subject { file('app/models/admin/permission.rb') }
 
       it { should exist }
-      it { should contain "class Admin::Role" }
+      it { should contain "class Admin::Permission" }
       it { should contain "has_and_belongs_to_many :admin_users" }
       it { should contain "belongs_to :resource, :polymorphic => true" }
     end
@@ -107,7 +107,7 @@ RUBY
     describe 'app/models/admin/user.rb' do
       subject { file('app/models/admin/user.rb') }
 
-      it { should contain /class User\n    include Mongoid::Document\n  rolify :role_cname => 'Admin::Role'\n/ }
+      it { should contain /class User\n    include Mongoid::Document\n  rolify :permission_cname => 'Admin::Permission'\n/ }
     end
   end
 end

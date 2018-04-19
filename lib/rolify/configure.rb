@@ -2,10 +2,10 @@ module Rolify
   module Configure
     @@dynamic_shortcuts = false
     @@orm = "active_record"
-    @@remove_role_if_empty = true
+    @@remove_permission_if_empty = true
 
-    def configure(*role_cnames)
-      return if !sanity_check(role_cnames)
+    def configure(*permission_cnames)
+      return if !sanity_check(permission_cnames)
       yield self if block_given?
     end
 
@@ -41,31 +41,31 @@ module Rolify
       end
     end
 
-    def remove_role_if_empty=(is_remove)
-      @@remove_role_if_empty = is_remove
+    def remove_permission_if_empty=(is_remove)
+      @@remove_permission_if_empty = is_remove
     end
 
-    def remove_role_if_empty
-      @@remove_role_if_empty
+    def remove_permission_if_empty
+      @@remove_permission_if_empty
     end
 
     private
 
-    def sanity_check(role_cnames)
+    def sanity_check(permission_cnames)
       return true if ARGV.reduce(nil) { |acc,arg| arg =~ /assets:/ if acc.nil? } == 0
 
-      role_cnames.each do |role_cname|
-        role_class = role_cname.constantize
-        if role_class.superclass.to_s == "ActiveRecord::Base" && role_table_missing?(role_class)
-          warn "[WARN] table '#{role_cname}' doesn't exist. Did you run the migration? Ignoring rolify config."
+      permission_cnames.each do |permission_cname|
+        permission_class = permission_cname.constantize
+        if permission_class.superclass.to_s == "ActiveRecord::Base" && permission_table_missing?(permission_class)
+          warn "[WARN] table '#{permission_cname}' doesn't exist. Did you run the migration? Ignoring rolify config."
           return false
         end
       end
       true
     end
 
-    def role_table_missing?(role_class)
-      !role_class.table_exists?
+    def permission_table_missing?(permission_class)
+      !permission_class.table_exists?
     rescue ActiveRecord::NoDatabaseError
       true
     end

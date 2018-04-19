@@ -4,7 +4,7 @@ describe "Resourcify and rolify on the same model" do
   
   before(:all) do
     reset_defaults
-    Role.delete_all
+    Permission.delete_all
     HumanResource.delete_all
   end
   
@@ -14,11 +14,11 @@ describe "Resourcify and rolify on the same model" do
     user
   end
   
-  it "should add the role to the user" do
-    expect { user.add_role :admin }.to change { user.roles.count }.by(1)
+  it "should add the permission to the user" do
+    expect { user.add_permission :admin }.to change { user.permissions.count }.by(1)
   end
       
-  it "should create a role to the roles collection" do
-    expect { user.add_role :moderator }.to change { Role.count }.by(1)
+  it "should create a permission to the permissions collection" do
+    expect { user.add_permission :moderator }.to change { Permission.count }.by(1)
   end
 end

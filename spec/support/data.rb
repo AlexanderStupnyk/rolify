@@ -8,9 +8,9 @@
   user.create(:login => "zombie")
 end
 
-# Roles
-[ Role, Privilege, Admin::Right ].each do |role|
-  role.destroy_all
+# Permissions
+[ Permission, Privilege, Admin::Right ].each do |permission|
+  permission.destroy_all
 end
 
 # Resources

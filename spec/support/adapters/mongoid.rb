@@ -15,7 +15,7 @@ end
 
 Rolify.use_mongoid
 
-# Standard user and role classes
+# Standard user and permission classes
 class User
   include Mongoid::Document
   default_scope -> { order_by id: 'asc' }
@@ -25,7 +25,7 @@ class User
   field :login, :type => String
 end
 
-# Standard user and role classes
+# Standard user and permission classes
 class StrictUser
   include Mongoid::Document
   default_scope -> { order_by id: 'asc' }
@@ -34,7 +34,7 @@ class StrictUser
   field :login, :type => String
 end
 
-class Role
+class Permission
   include Mongoid::Document
   has_and_belongs_to_many :users
   has_and_belongs_to_many :strict_users
@@ -80,11 +80,11 @@ end
 #  )
 #end
 
-# Custom role and class names
+# Custom permission and class names
 class Customer
   include Mongoid::Document
   default_scope -> { order_by id: 'asc' }
-  rolify :role_cname => "Privilege"
+  rolify :permission_cname => "Privilege"
 
   field :login, :type => String
 end
@@ -112,7 +112,7 @@ module Admin
   class Moderator
     include Mongoid::Document
     default_scope -> { order_by id: 'asc' }
-    rolify :role_cname => "Admin::Right"
+    rolify :permission_cname => "Admin::Right"
 
     field :login, :type => String
   end

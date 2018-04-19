@@ -1,20 +1,20 @@
 require 'rspec/expectations'
 
-RSpec::Matchers.define :have_role do |*args|
+RSpec::Matchers.define :have_permission do |*args|
   match do |resource|
-    resource.has_role?(*args)
+    resource.has_permission?(*args)
   end
 
   failure_message do |resource|
-    "expected to have role #{args.map(&:inspect).join(" ")}"
+    "expected to have permission #{args.map(&:inspect).join(" ")}"
   end
 
   failure_message_when_negated do |resource|
-    "expected not to have role #{args.map(&:inspect).join(" ")}"
+    "expected not to have permission #{args.map(&:inspect).join(" ")}"
   end
 end
 
-RSpec::Matchers.define :be_the_same_role do |*expected|
+RSpec::Matchers.define :be_the_same_permission do |*expected|
   match do |actual|
     if expected.size > 1 
       if expected[1].is_a? Class

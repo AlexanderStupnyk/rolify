@@ -12,7 +12,7 @@ module Mongoid
         invoke "mongoid:model", [ name ]
       end
 
-      def inject_role_class
+      def inject_permission_class
         inject_into_file(model_path, model_contents, :after => "include Mongoid::Document\n")
       end
 
@@ -20,7 +20,7 @@ module Mongoid
         user_cname.demodulize.underscore
       end
 
-      def role_reference
+      def permission_reference
         class_name.demodulize.underscore
       end
 

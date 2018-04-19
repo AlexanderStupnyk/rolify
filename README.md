@@ -1,17 +1,17 @@
 # rolify [![Gem Version](https://badge.fury.io/rb/rolify.svg)](http://badge.fury.io/rb/rolify) [![build status](https://secure.travis-ci.org/RolifyCommunity/rolify.png)](http://travis-ci.org/RolifyCommunity/rolify) [![Dependency Status](https://gemnasium.com/RolifyCommunity/rolify.svg)](https://gemnasium.com/RolifyCommunity/rolify) [![Code Climate](https://codeclimate.com/github/RolifyCommunity/rolify.png)](https://codeclimate.com/github/RolifyCommunity/rolify) [![Coverage Status](https://coveralls.io/repos/RolifyCommunity/rolify/badge.svg?branch=master&service=github)](https://coveralls.io/github/RolifyCommunity/rolify?branch=master)
 
-Very simple Roles library without any authorization enforcement supporting scope on resource object.
+Very simple Permissions library without any authorization enforcement supporting scope on resource object.
 
 Let's see an example:
 
 ```ruby
-user.has_role?(:moderator, @forum)
+user.has_permission?(:moderator, @forum)
 => false # if user is moderator of another Forum
 ```
 
 This library can be easily integrated with any authentication gem ([devise](https://github.com/plataformatec/devise), [Authlogic](https://github.com/binarylogic/authlogic), [Clearance](https://github.com/thoughtbot/clearance)) and authorization gem<span style="color: red"><strong>*</strong></span> ([CanCanCan](https://github.com/CanCanCommunity/cancancan), [authority](https://github.com/nathanl/authority), [Pundit](https://github.com/elabs/pundit))
 
-<span style="color: red"><strong>*</strong></span>: authorization gem that doesn't provide a role class
+<span style="color: red"><strong>*</strong></span>: authorization gem that doesn't provide a permission class
 
 ## Requirements
 
@@ -30,23 +30,23 @@ gem "rolify"
 
 ## Getting Started
 
-### 1. Generate Role Model
+### 1. Generate Permission Model
 
-First, use the generator to setup Rolify. Role and User class are the default names. However, you can specify any class name you want. For the User class name, you would probably use the one provided by your authentication solution.
+First, use the generator to setup Rolify. Permission and User class are the default names. However, you can specify any class name you want. For the User class name, you would probably use the one provided by your authentication solution.
 
 If you want to use Mongoid instead of ActiveRecord, just add `--orm=mongoid` argument, and skip to step #3.
 
 ```
-rails g rolify Role User
+rails g rolify Permission User
 ```
 
 **NB** for versions of Rolify prior to 3.3, use:
 
 ```
-rails g rolify:role Role User
+rails g rolify:permission Permission User
 ```
 
-The generator will create your Role model, add a migration file, and update your User class with new class methods. 
+The generator will create your Permission model, add a migration file, and update your User class with new class methods. 
 
 ### 2. Run the migration (only required when using ActiveRecord)
 
@@ -58,13 +58,13 @@ rake db:migrate
 
 ### 3.1 Configure your user model
 
-This gem adds the `rolify` method to your User class. You can also specify optional callbacks on the User class for when roles are added or removed:
+This gem adds the `rolify` method to your User class. You can also specify optional callbacks on the User class for when permissions are added or removed:
 
 ```ruby
 class User < ActiveRecord::Base
   rolify :before_add => :before_add_method
 
-  def before_add_method(role)
+  def before_add_method(permission)
     # do something before it gets added
   end
 end
@@ -83,7 +83,7 @@ The `rolify` method also accepts the `inverse_of` option if you need to disambig
 
 ### 3.2 Configure your resource models
 
-In the resource models you want to apply roles on, just add ``resourcify`` method.
+In the resource models you want to apply permissions on, just add ``resourcify`` method.
 For example, on this ActiveRecord class:
 
 ```ruby
@@ -92,136 +92,136 @@ class Forum < ActiveRecord::Base
 end
 ```
 
-### 3.3 Assign default role
+### 3.3 Assign default permission
 
 ```ruby
 class User < ActiveRecord::Base
-  after_create :assign_default_role
+  after_create :assign_default_permission
 
-  def assign_default_role
-    self.add_role(:newuser) if self.roles.blank?
+  def assign_default_permission
+    self.add_permission(:newuser) if self.permissions.blank?
   end
 end
 ```
 
-### 4. Add a role to a user
+### 4. Add a permission to a user
 
-To define a global role:
+To define a global permission:
 
 ```ruby
 user = User.find(1)
-user.add_role :admin
+user.add_permission :admin
 ```
 
-To define a role scoped to a resource instance:
+To define a permission scoped to a resource instance:
 
 ```ruby
 user = User.find(2)
-user.add_role :moderator, Forum.first
+user.add_permission :moderator, Forum.first
 ```
 
-To define a role scoped to a resource class:
+To define a permission scoped to a resource class:
 
 ```ruby
 user = User.find(3)
-user.add_role :moderator, Forum
+user.add_permission :moderator, Forum
 ```
 
-Remove role:
+Remove permission:
 ```ruby
 user = User.find(3)
-user.remove_role :moderator
+user.remove_permission :moderator
 ```
 
 That's it!
 
-### 5. Role queries
+### 5. Permission queries
 
-To check if a user has a global role:
+To check if a user has a global permission:
 
 ```ruby
 user = User.find(1)
-user.add_role :admin # sets a global role
-user.has_role? :admin
+user.add_permission :admin # sets a global permission
+user.has_permission? :admin
 => true
 ```
 
-To check if a user has a role scoped to a resource instance:
+To check if a user has a permission scoped to a resource instance:
 
 ```ruby
 user = User.find(2)
-user.add_role :moderator, Forum.first # sets a role scoped to a resource instance
-user.has_role? :moderator, Forum.first
+user.add_permission :moderator, Forum.first # sets a permission scoped to a resource instance
+user.has_permission? :moderator, Forum.first
 => true
-user.has_role? :moderator, Forum.last
+user.has_permission? :moderator, Forum.last
 => false
 ```
 
-To check if a user has a role scoped to a resource class:
+To check if a user has a permission scoped to a resource class:
 
 ```ruby
 user = User.find(3)
-user.add_role :moderator, Forum # sets a role scoped to a resource class
-user.has_role? :moderator, Forum
+user.add_permission :moderator, Forum # sets a permission scoped to a resource class
+user.has_permission? :moderator, Forum
 => true
-user.has_role? :moderator, Forum.first
+user.has_permission? :moderator, Forum.first
 => true
-user.has_role? :moderator, Forum.last
+user.has_permission? :moderator, Forum.last
 => true
 ```
 
-A global role overrides resource role request:
+A global permission overrides resource permission request:
 
 ```ruby
 user = User.find(4)
-user.add_role :moderator # sets a global role
-user.has_role? :moderator, Forum.first
+user.add_permission :moderator # sets a global permission
+user.has_permission? :moderator, Forum.first
 => true
-user.has_role? :moderator, Forum.last
+user.has_permission? :moderator, Forum.last
 => true
 ```
 
-### 6. Resource roles querying
+### 6. Resource permissions querying
 
-Starting from rolify 3.0, you can search roles on instance level or class level resources.
+Starting from rolify 3.0, you can search permissions on instance level or class level resources.
 
 #### Instance level
 
 ```ruby
 forum = Forum.first
-forum.roles
-# => [ list of roles that are only bound to forum instance ]
-forum.applied_roles
-# => [ list of roles bound to forum instance and to the Forum class ]
+forum.permissions
+# => [ list of permissions that are only bound to forum instance ]
+forum.applied_permissions
+# => [ list of permissions bound to forum instance and to the Forum class ]
 ```
 
 #### Class level
 
 ```ruby
-Forum.with_role(:admin)
-# => [ list of Forum instances that have role "admin" bound to them ]
-Forum.without_role(:admin)
-# => [ list of Forum instances that do NOT have role "admin" bound to them ]
-Forum.with_role(:admin, current_user)
-# => [ list of Forum instances that have role "admin" bound to them and belong to current_user roles ]
-Forum.with_roles([:admin, :user], current_user)
-# => [ list of Forum instances that have role "admin" or "user" bound to them and belong to current_user roles ]
+Forum.with_permission(:admin)
+# => [ list of Forum instances that have permission "admin" bound to them ]
+Forum.without_permission(:admin)
+# => [ list of Forum instances that do NOT have permission "admin" bound to them ]
+Forum.with_permission(:admin, current_user)
+# => [ list of Forum instances that have permission "admin" bound to them and belong to current_user permissions ]
+Forum.with_permissions([:admin, :user], current_user)
+# => [ list of Forum instances that have permission "admin" or "user" bound to them and belong to current_user permissions ]
 
-User.with_any_role(:user, :admin)
-# => [ list of User instances that have role "admin" or "user" bound to them ]
-User.with_role(:site_admin, current_site)
-# => [ list of User instances that have a scoped role of "site_admin" to a site instance ]
-User.with_role(:site_admin, :any)
-# => [ list of User instances that have a scoped role of "site_admin" for any site instances ]
-User.with_all_roles(:site_admin, :admin)
-# => [ list of User instances that have a role of "site_admin" and a role of "admin" bound to it ]
+User.with_any_permission(:user, :admin)
+# => [ list of User instances that have permission "admin" or "user" bound to them ]
+User.with_permission(:site_admin, current_site)
+# => [ list of User instances that have a scoped permission of "site_admin" to a site instance ]
+User.with_permission(:site_admin, :any)
+# => [ list of User instances that have a scoped permission of "site_admin" for any site instances ]
+User.with_all_permissions(:site_admin, :admin)
+# => [ list of User instances that have a permission of "site_admin" and a permission of "admin" bound to it ]
 
-Forum.find_roles
-# => [ list of roles that are bound to any Forum instance or to the Forum class ]
-Forum.find_roles(:admin)
-# => [ list of roles that are bound to any Forum instance or to the Forum class, with "admin" as a role name ]
-Forum.find_roles(:admin, current_user)
-# => [ list of roles that are bound to any Forum instance, or to the Forum class with "admin" as a role name, and belongs to current_user ]
+Forum.find_permissions
+# => [ list of permissions that are bound to any Forum instance or to the Forum class ]
+Forum.find_permissions(:admin)
+# => [ list of permissions that are bound to any Forum instance or to the Forum class, with "admin" as a permission name ]
+Forum.find_permissions(:admin, current_user)
+# => [ list of permissions that are bound to any Forum instance, or to the Forum class with "admin" as a permission name, and belongs to current_user ]
 ```
 
 ### Strict Mode
@@ -233,28 +233,28 @@ end
 
 @user = User.first
 
-@user.add_role(:forum, Forum)
-@user.add_role(:forum, Forum.first)
+@user.add_permission(:forum, Forum)
+@user.add_permission(:forum, Forum.first)
 
-@user.has_role?(:forum, Forum) #=> true
-@user.has_role?(:forum, Forum.first) #=> true
-@user.has_role?(:forum, Forum.last) #=> false
+@user.has_permission?(:forum, Forum) #=> true
+@user.has_permission?(:forum, Forum.first) #=> true
+@user.has_permission?(:forum, Forum.last) #=> false
 ```
-I.e. you get true only on a role that you manually add.
+I.e. you get true only on a permission that you manually add.
 
-### Cached Roles (to avoid N+1 issue)
+### Cached Permissions (to avoid N+1 issue)
 
 ```ruby
-@user.add_role :admin, Forum
-@user.add_role :member, Forum
+@user.add_permission :admin, Forum
+@user.add_permission :member, Forum
 
-users = User.with_role(:admin, Forum).preload(:roles)
+users = User.with_permission(:admin, Forum).preload(:permissions)
 users.each do |user|
-  user.has_cached_role?(:member, Forum) # no extra queries
+  user.has_cached_permission?(:member, Forum) # no extra queries
 end
 ```
 
-This method should be used with caution. If you don't preload the roles, the `has_cached_role?` might return `false`. In the above example, it would return `false` for `@user.has_cached_role?(:member, Forum)`, because `User.with_role(:admin, Forum)` will load only the `:admin` roles.
+This method should be used with caution. If you don't preload the permissions, the `has_cached_permission?` might return `false`. In the above example, it would return `false` for `@user.has_cached_permission?(:member, Forum)`, because `User.with_permission(:admin, Forum)` will load only the `:admin` permissions.
 
 ## Resources
 

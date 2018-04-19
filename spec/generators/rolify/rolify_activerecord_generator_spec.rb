@@ -17,8 +17,8 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'active_r
     FileUtils.rm_rf destination_root
   end
 
-  describe 'specifying only Role class name' do
-    before(:all) { arguments %w(Role) }
+  describe 'specifying only Permission class name' do
+    before(:all) { arguments %w(Permission) }
 
     before {
       allow(ActiveRecord::Base).to receive_message_chain(
@@ -43,17 +43,17 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'active_r
       it { should contain "# config.use_mongoid" }
     end
 
-    describe 'app/models/role.rb' do
-      subject { file('app/models/role.rb') }
+    describe 'app/models/permission.rb' do
+      subject { file('app/models/permission.rb') }
       it { should exist }
       it do
         if Rails::VERSION::MAJOR < 5
-          should contain "class Role < ActiveRecord::Base"
+          should contain "class Permission < ActiveRecord::Base"
         else
-          should contain "class Role < ApplicationRecord"
+          should contain "class Permission < ApplicationRecord"
         end
       end
-      it { should contain "has_and_belongs_to_many :users, :join_table => :users_roles" }
+      it { should contain "has_and_belongs_to_many :users, :join_table => :users_permissions" }
       it do
         if Rails::VERSION::MAJOR < 5
           should contain "belongs_to :resource,\n"
@@ -79,34 +79,34 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'active_r
     end
 
     describe 'migration file' do
-      subject { migration_file('db/migrate/rolify_create_roles.rb') }
+      subject { migration_file('db/migrate/rolify_create_permissions.rb') }
 
       it { should be_a_migration }
-      it { should contain "create_table(:roles) do" }
-      it { should contain "create_table(:users_roles, :id => false) do" }
+      it { should contain "create_table(:permissions) do" }
+      it { should contain "create_table(:users_permissions, :id => false) do" }
 
       context 'mysql2' do
         let(:adapter) { 'Mysql2Adapter' }
 
-        it { expect(subject).to contain('add_index(:roles, :name)') }
+        it { expect(subject).to contain('add_index(:permissions, :name)') }
       end
 
       context 'sqlite3' do
         let(:adapter) { 'SQLite3Adapter' }
 
-        it { expect(subject).to contain('add_index(:roles, :name)') }
+        it { expect(subject).to contain('add_index(:permissions, :name)') }
       end
 
       context 'pg' do
         let(:adapter) { 'PostgreSQLAdapter' }
 
-        it { expect(subject).not_to contain('add_index(:roles, :name)') }
+        it { expect(subject).not_to contain('add_index(:permissions, :name)') }
       end
     end
   end
 
-  describe 'specifying User and Role class names' do
-    before(:all) { arguments %w(AdminRole AdminUser) }
+  describe 'specifying User and Permission class names' do
+    before(:all) { arguments %w(AdminPermission AdminUser) }
 
     before {
       allow(ActiveRecord::Base).to receive_message_chain(
@@ -124,23 +124,23 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'active_r
       subject { file('config/initializers/rolify.rb') }
 
       it { should exist }
-      it { should contain "Rolify.configure(\"AdminRole\") do |config|"}
+      it { should contain "Rolify.configure(\"AdminPermission\") do |config|"}
       it { should contain "# config.use_dynamic_shortcuts" }
       it { should contain "# config.use_mongoid" }
     end
 
-    describe 'app/models/admin_role.rb' do
-      subject { file('app/models/admin_role.rb') }
+    describe 'app/models/admin_permission.rb' do
+      subject { file('app/models/admin_permission.rb') }
 
       it { should exist }
       it do
         if Rails::VERSION::MAJOR < 5
-          should contain "class AdminRole < ActiveRecord::Base"
+          should contain "class AdminPermission < ActiveRecord::Base"
         else
-          should contain "class AdminRole < ApplicationRecord"
+          should contain "class AdminPermission < ApplicationRecord"
         end
       end
-      it { should contain "has_and_belongs_to_many :admin_users, :join_table => :admin_users_admin_roles" }
+      it { should contain "has_and_belongs_to_many :admin_users, :join_table => :admin_users_admin_permissions" }
       it { should contain "belongs_to :resource,\n"
                           "           :polymorphic => true,\n"
                           "           :optional => true"
@@ -150,38 +150,38 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'active_r
     describe 'app/models/admin_user.rb' do
       subject { file('app/models/admin_user.rb') }
 
-      it { should contain /class AdminUser < ActiveRecord::Base\n  rolify :role_cname => 'AdminRole'\n/ }
+      it { should contain /class AdminUser < ActiveRecord::Base\n  rolify :permission_cname => 'AdminPermission'\n/ }
     end
 
     describe 'migration file' do
-      subject { migration_file('db/migrate/rolify_create_admin_roles.rb') }
+      subject { migration_file('db/migrate/rolify_create_admin_permissions.rb') }
 
       it { should be_a_migration }
-      it { should contain "create_table(:admin_roles)" }
-      it { should contain "create_table(:admin_users_admin_roles, :id => false) do" }
+      it { should contain "create_table(:admin_permissions)" }
+      it { should contain "create_table(:admin_users_admin_permissions, :id => false) do" }
 
       context 'mysql2' do
         let(:adapter) { 'Mysql2Adapter' }
 
-        it { expect(subject).to contain('add_index(:admin_roles, :name)') }
+        it { expect(subject).to contain('add_index(:admin_permissions, :name)') }
       end
 
       context 'sqlite3' do
         let(:adapter) { 'SQLite3Adapter' }
 
-        it { expect(subject).to contain('add_index(:admin_roles, :name)') }
+        it { expect(subject).to contain('add_index(:admin_permissions, :name)') }
       end
 
       context 'pg' do
         let(:adapter) { 'PostgreSQLAdapter' }
 
-        it { expect(subject).not_to contain('add_index(:admin_roles, :name)') }
+        it { expect(subject).not_to contain('add_index(:admin_permissions, :name)') }
       end
     end
   end
 
-  describe 'specifying namespaced User and Role class names' do
-    before(:all) { arguments %w(Admin::Role Admin::User) }
+  describe 'specifying namespaced User and Permission class names' do
+    before(:all) { arguments %w(Admin::Permission Admin::User) }
 
     before {
       allow(ActiveRecord::Base).to receive_message_chain(
@@ -205,23 +205,23 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'active_r
       subject { file('config/initializers/rolify.rb') }
 
       it { should exist }
-      it { should contain "Rolify.configure(\"Admin::Role\") do |config|"}
+      it { should contain "Rolify.configure(\"Admin::Permission\") do |config|"}
       it { should contain "# config.use_dynamic_shortcuts" }
       it { should contain "# config.use_mongoid" }
     end
 
-    describe 'app/models/admin/role.rb' do
-      subject { file('app/models/admin/role.rb') }
+    describe 'app/models/admin/permission.rb' do
+      subject { file('app/models/admin/permission.rb') }
 
       it { should exist }
       it do
         if Rails::VERSION::MAJOR < 5
-          should contain "class Admin::Role < ActiveRecord::Base"
+          should contain "class Admin::Permission < ActiveRecord::Base"
         else
-          should contain "class Admin::Role < ApplicationRecord"
+          should contain "class Admin::Permission < ApplicationRecord"
         end
       end
-      it { should contain "has_and_belongs_to_many :admin_users, :join_table => :admin_users_admin_roles" }
+      it { should contain "has_and_belongs_to_many :admin_users, :join_table => :admin_users_admin_permissions" }
       it { should contain "belongs_to :resource,\n"
                           "           :polymorphic => true,\n"
                           "           :optional => true"
@@ -231,32 +231,32 @@ describe Rolify::Generators::RolifyGenerator, :if => ENV['ADAPTER'] == 'active_r
     describe 'app/models/admin/user.rb' do
       subject { file('app/models/admin/user.rb') }
 
-      it { should contain /class User < ActiveRecord::Base\n  rolify :role_cname => 'Admin::Role'\n/ }
+      it { should contain /class User < ActiveRecord::Base\n  rolify :permission_cname => 'Admin::Permission'\n/ }
     end
 
     describe 'migration file' do
-      subject { migration_file('db/migrate/rolify_create_admin_roles.rb') }
+      subject { migration_file('db/migrate/rolify_create_admin_permissions.rb') }
 
       it { should be_a_migration }
-      it { should contain "create_table(:admin_roles)" }
-      it { should contain "create_table(:admin_users_admin_roles, :id => false) do" }
+      it { should contain "create_table(:admin_permissions)" }
+      it { should contain "create_table(:admin_users_admin_permissions, :id => false) do" }
 
       context 'mysql2' do
         let(:adapter) { 'Mysql2Adapter' }
 
-        it { expect(subject).to contain('add_index(:admin_roles, :name)') }
+        it { expect(subject).to contain('add_index(:admin_permissions, :name)') }
       end
 
       context 'sqlite3' do
         let(:adapter) { 'SQLite3Adapter' }
 
-        it { expect(subject).to contain('add_index(:admin_roles, :name)') }
+        it { expect(subject).to contain('add_index(:admin_permissions, :name)') }
       end
 
       context 'pg' do
         let(:adapter) { 'PostgreSQLAdapter' }
 
-        it { expect(subject).not_to contain('add_index(:admin_roles, :name)') }
+        it { expect(subject).not_to contain('add_index(:admin_permissions, :name)') }
       end
     end
   end

@@ -1,4 +1,4 @@
-class <%= role_cname.camelize %>
+class <%= permission_cname.camelize %>
   include Mongoid::Document
   
   has_and_belongs_to_many :<%= user_cname.tableize %>

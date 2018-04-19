@@ -3,14 +3,14 @@ require 'rolify/adapters/base'
 module Rolify
   module Adapter
     class ResourceAdapter < ResourceAdapterBase
-      def find_roles(role_name, relation, user)
-        roles = user && (user != :any) ? user.roles : self.role_class
-        roles = roles.where('resource_type IN (?)', self.relation_types_for(relation))
-        roles = roles.where(:name => role_name.to_s) if role_name && (role_name != :any)
-        roles
+      def find_permissions(permission_name, relation, user)
+        permissions = user && (user != :any) ? user.permissions : self.permission_class
+        permissions = permissions.where('resource_type IN (?)', self.relation_types_for(relation))
+        permissions = permissions.where(:name => permission_name.to_s) if permission_name && (permission_name != :any)
+        permissions
       end
 
-      def resources_find(roles_table, relation, role_name)
+      def resources_find(permissions_table, relation, permission_name)
         klasses   = self.relation_types_for(relation)
         relations = klasses.inject('') do |str, klass|
           str = "#{str}'#{klass.to_s}'"
@@ -18,23 +18,23 @@ module Rolify
           str
         end
 
-        resources = relation.joins("INNER JOIN #{quote_table(roles_table)} ON #{quote_table(roles_table)}.resource_type IN (#{relations}) AND
-                                    (#{quote_table(roles_table)}.resource_id IS NULL OR #{quote_table(roles_table)}.resource_id = #{quote_table(relation.table_name)}.#{quote_column(relation.primary_key)})")
-        resources = resources.where("#{quote_table(roles_table)}.name IN (?) AND #{quote_table(roles_table)}.resource_type IN (?)", Array(role_name), klasses)
+        resources = relation.joins("INNER JOIN #{quote_table(permissions_table)} ON #{quote_table(permissions_table)}.resource_type IN (#{relations}) AND
+                                    (#{quote_table(permissions_table)}.resource_id IS NULL OR #{quote_table(permissions_table)}.resource_id = #{quote_table(relation.table_name)}.#{quote_column(relation.primary_key)})")
+        resources = resources.where("#{quote_table(permissions_table)}.name IN (?) AND #{quote_table(permissions_table)}.resource_type IN (?)", Array(permission_name), klasses)
         resources = resources.select("#{quote_table(relation.table_name)}.*")
         resources
       end
 
-      def in(relation, user, role_names)
-        roles = user.roles.where(:name => role_names).select("#{quote_table(role_class.table_name)}.#{quote_column(role_class.primary_key)}")
-        relation.where("#{quote_table(role_class.table_name)}.#{quote_column(role_class.primary_key)} IN (?) AND ((#{quote_table(role_class.table_name)}.resource_id = #{quote_table(relation.table_name)}.#{quote_column(relation.primary_key)}) OR (#{quote_table(role_class.table_name)}.resource_id IS NULL))", roles)
+      def in(relation, user, permission_names)
+        permissions = user.permissions.where(:name => permission_names).select("#{quote_table(permission_class.table_name)}.#{quote_column(permission_class.primary_key)}")
+        relation.where("#{quote_table(permission_class.table_name)}.#{quote_column(permission_class.primary_key)} IN (?) AND ((#{quote_table(permission_class.table_name)}.resource_id = #{quote_table(relation.table_name)}.#{quote_column(relation.primary_key)}) OR (#{quote_table(permission_class.table_name)}.resource_id IS NULL))", permissions)
       end
 
-      def applied_roles(relation, children)
+      def applied_permissions(relation, children)
         if children
-          relation.role_class.where('resource_type IN (?) AND resource_id IS NULL', self.relation_types_for(relation))
+          relation.permission_class.where('resource_type IN (?) AND resource_id IS NULL', self.relation_types_for(relation))
         else
-          relation.role_class.where('resource_type = ? AND resource_id IS NULL', relation.to_s)
+          relation.permission_class.where('resource_type = ? AND resource_id IS NULL', relation.to_s)
         end
       end
 

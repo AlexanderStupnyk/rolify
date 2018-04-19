@@ -28,12 +28,12 @@ def reset_defaults
   Rolify.use_mongoid if ENV['ADAPTER'] == 'mongoid'
 end
 
-def provision_user(user, roles)
-  roles.each do |role|
-    if role.is_a? Array
-      user.add_role *role
+def provision_user(user, permissions)
+  permissions.each do |permission|
+    if permission.is_a? Array
+      user.add_permission *permission
     else
-      user.add_role role
+      user.add_permission permission
     end
   end
   user

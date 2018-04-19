@@ -7,21 +7,21 @@ ActiveRecord::Base.extend Rolify
 
 load File.dirname(__FILE__) + '/../schema.rb'
 
-# Standard user and role classes
+# Standard user and permission classes
 class User < ActiveRecord::Base
   rolify
 end
 
-class Role < ActiveRecord::Base
-  has_and_belongs_to_many :users, :join_table => :users_roles
-  has_and_belongs_to_many :strict_users, :join_table => :strict_users_roles
+class Permission < ActiveRecord::Base
+  has_and_belongs_to_many :users, :join_table => :users_permissions
+  has_and_belongs_to_many :strict_users, :join_table => :strict_users_permissions
 
   belongs_to :resource, :polymorphic => true
 
   extend Rolify::Adapter::Scopes
 end
 
-# Strict user and role classes
+# Strict user and permission classes
 class StrictUser < ActiveRecord::Base
   rolify strict: true
 end
@@ -32,9 +32,9 @@ class HumanResource < ActiveRecord::Base
   rolify
 end
 
-# Custom role and class names
+# Custom permission and class names
 class Customer < ActiveRecord::Base
-  rolify :role_cname => "Privilege"
+  rolify :permission_cname => "Privilege"
 end
 
 class Privilege < ActiveRecord::Base
@@ -51,7 +51,7 @@ module Admin
   end
 
   class Moderator < ActiveRecord::Base
-    rolify :role_cname => "Admin::Right", :role_join_table_name => "moderators_rights"
+    rolify :permission_cname => "Admin::Right", :permission_join_table_name => "moderators_rights"
   end
 
   class Right < ActiveRecord::Base

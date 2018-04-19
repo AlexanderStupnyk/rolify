@@ -47,7 +47,7 @@ describe Rolify do
         
         subject { ARUser }
         
-        its("adapter.class") { should be(Rolify::Adapter::RoleAdapter) }
+        its("adapter.class") { should be(Rolify::Adapter::PermissionAdapter) }
       end
       
       context "on the Forum class" do
@@ -78,7 +78,7 @@ describe Rolify do
 
           subject { MUser }
           
-          its("adapter.class") { should be(Rolify::Adapter::RoleAdapter) }
+          its("adapter.class") { should be(Rolify::Adapter::PermissionAdapter) }
         end
 
         context "on the Forum class" do
@@ -108,7 +108,7 @@ describe Rolify do
 
           subject { MUser }
           
-          its("adapter.class") { should be(Rolify::Adapter::RoleAdapter) }
+          its("adapter.class") { should be(Rolify::Adapter::PermissionAdapter) }
         end
 
         context "on the Forum class" do
@@ -174,9 +174,9 @@ describe Rolify do
 
       subject { MUser }
       
-      it { should satisfy { |u| u.include? Rolify::Role }}
+      it { should satisfy { |u| u.include? Rolify::Permission }}
       it { should satisfy { |u| u.singleton_class.include? Rolify::Dynamic } }
-      its("adapter.class") { should be(Rolify::Adapter::RoleAdapter) }
+      its("adapter.class") { should be(Rolify::Adapter::PermissionAdapter) }
     end
 
     context "on the Forum class" do
